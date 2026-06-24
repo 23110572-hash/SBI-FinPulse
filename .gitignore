@@ -1,0 +1,33 @@
+# Secrets and local environment overrides
+.env
+.env.*
+!.env.example
+backend/.env
+frontend/.env.local
+
+# Local dependencies and generated build output
+**/node_modules/
+**/venv/
+**/.venv/
+**/.next/
+**/dist/
+**/build/
+**/out/
+
+# Python caches and local data
+**/__pycache__/
+*.py[cod]
+backend/chroma_db/
+backend/finpulse.db
+
+# Cloud CLI state
+.vercel/
+.render/
+
+# Logs, temporary files, and OS/editor metadata
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

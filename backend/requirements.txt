@@ -1,0 +1,58 @@
+# === SBI FinPulse Backend Dependencies (pinned for reproducible deploys) ===
+# Generated from the known-working virtualenv (pip freeze) so Render builds
+# the exact same dependency set that runs locally. crewai pins a deep
+# transitive tree (litellm / langchain / chromadb) — pinning avoids a silent
+# breaking upgrade at deploy time.
+#
+# NOTE: psycopg2-binary is REQUIRED — the Neon DATABASE_URL uses the
+# postgresql:// dialect, which SQLAlchemy resolves to psycopg2.
+
+# --- PostgreSQL driver (REQUIRED for Neon) ---
+psycopg2-binary==2.9.12
+
+# --- API ---
+fastapi==0.136.3
+uvicorn[standard]==0.49.0
+python-dotenv==1.2.2
+python-multipart==0.0.32
+pydantic==2.12.5
+pydantic-settings==2.10.1
+sse-starlette==3.4.4
+
+# --- Database ---
+SQLAlchemy==2.0.50
+
+# --- Multi-agent + LLM ---
+crewai==1.14.7
+crewai-tools==1.14.7
+litellm==1.89.2
+openai==2.41.1
+groq==0.37.1
+instructor==1.15.1
+
+# --- LangChain integrations ---
+langchain-google-genai==4.2.5
+langchain-groq==1.1.3
+langchain-chroma==1.0.0
+langchain-community==0.4.2
+langchain-core==1.4.7
+langchain-text-splitters==1.1.2
+
+# --- Orchestration graph ---
+langgraph==1.2.5
+
+# --- RAG / Vector store ---
+chromadb==1.1.1
+
+# --- Embeddings (Hugging Face Inference) ---
+huggingface_hub==1.19.0
+numpy==2.4.6
+
+# --- Data generation ---
+Faker==40.23.0
+
+# --- Proactive engagement scheduler ---
+APScheduler==3.11.2
+
+# --- HTTP client (SBI sandbox / Account Aggregator / delivery) ---
+httpx==0.28.1

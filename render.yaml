@@ -1,0 +1,76 @@
+# Render Blueprint — SBI FinPulse backend (FastAPI)
+# Deploy: push to your repo, then in Render → "New +" → "Blueprint" and point
+# it at this repo. Render reads this file and provisions the service.
+#
+# All secrets are set as environment variables in the Render dashboard
+# (sync: false means Render prompts you / you set them manually — they are
+# never committed to git).
+services:
+  - type: web
+    name: sbi-finpulse-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    # crewai's tree resolves cleanly on 3.12; match local (3.12.10).
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    # Render injects $PORT — the app MUST bind to it (0.0.0.0).
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+
+      # --- Core (REQUIRED) ---
+      - key: DATABASE_URL          # Neon postgres URL (postgresql://...sslmode=require)
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_API_KEY_2
+        sync: false
+      - key: GROQ_API_KEY_3
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+
+      # --- Vector store (Chroma Cloud — required because Render's disk is ephemeral) ---
+      - key: CHROMA_MODE
+        value: cloud
+      - key: CHROMA_API_KEY
+        sync: false
+      - key: CHROMA_TENANT
+        sync: false
+      - key: CHROMA_DATABASE
+        value: SBI
+
+      # --- CORS — set to your deployed Vercel URL (comma-separated for multiple) ---
+      # e.g. https://sbi-finpulse.vercel.app
+      - key: CORS_ORIGINS
+        sync: false
+
+      # --- Email (SMTP) outbound channel ---
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+      # --- Proactive engagement ---
+      - key: ENABLE_SCHEDULER
+        value: "true"
+      - key: AUTO_SEND_APPROVED
+        value: "true"
+      - key: PROACTIVE_CHANNEL
+        value: email
+      - key: DATA_PROVIDER
+        value: synthetic
+
+      # --- Auth (optional — set a token to lock the staff console in production) ---
+      - key: STAFF_API_TOKEN
+        sync: false
+      - key: ENFORCE_CUSTOMER_SCOPE
+        value: "false"
