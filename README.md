@@ -14,6 +14,20 @@
 
 ---
 
+## 🌐 Live deployment
+
+| Surface | URL |
+|---|---|
+| **🖥️ Frontend (Vercel)** | https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app/ |
+| **⚙️ Backend API (Render)** | https://sbi-finpulse-api.onrender.com |
+| **❤️ API health check** | https://sbi-finpulse-api.onrender.com/api/health |
+| **📚 API docs (Swagger)** | https://sbi-finpulse-api.onrender.com/docs |
+| **💾 Source (GitHub)** | https://github.com/23110572-hash/SBI-FinPulse |
+
+> **Note on the backend:** it runs on Render's free tier, which spins down after ~15 min of inactivity. The first request after idle may take ~30–60s to cold-start — give it a moment, then it's fast.
+
+---
+
 ## 📖 What you'll find in this document
 
 I wrote this so that **anyone** — a judge, a banker, a developer, or a teammate seeing the project for the first time — can understand exactly what FinPulse is, why it matters, and how every piece works. No prior context needed. We'll go from the problem, to the solution, to the architecture, to how the five AI agents think, to how it stays safe and legal, and finally to the business impact in real numbers.
@@ -369,9 +383,15 @@ Administrative data generation, database seeding, and RAG ingestion scripts rema
 
 ## 12. Deployment (Vercel + Render)
 
-- **Backend → Render**: a `render.yaml` blueprint is included at the repo root — it pins Python 3.12, installs the pinned `requirements.txt`, binds to Render's `$PORT`, and exposes a `/api/health` check.
-- **Frontend → Vercel**: set the project **Root Directory to `frontend`** and add `NEXT_PUBLIC_API_URL` pointing at your Render backend URL.
-- **CORS**: set `CORS_ORIGINS` on Render to your exact Vercel URL.
+**This project is live:**
+- **Frontend (Vercel):** https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app/
+- **Backend (Render):** https://sbi-finpulse-api.onrender.com
+
+How it's wired:
+
+- **Backend → Render**: a `render.yaml` blueprint is included at the repo root — it pins Python 3.12, installs the pinned `requirements.txt`, binds to Render's `$PORT`, and exposes a `/api/health` check. The live service is deployed at `https://sbi-finpulse-api.onrender.com`.
+- **Frontend → Vercel**: set the project **Root Directory to `frontend`** and add `NEXT_PUBLIC_API_URL=https://sbi-finpulse-api.onrender.com` so the app talks to the live backend.
+- **CORS**: `CORS_ORIGINS` on Render is set to the exact Vercel URL above so the browser can call the API.
 - **Scheduler at scale**: the daily sweep is guarded by a Postgres advisory lock so only one worker runs it. For large deployments, run it as a dedicated **Render Cron Job** hitting `POST /api/engagement/scan` instead of inside the web app.
 
 📄 **Full step-by-step guide:** see [`DEPLOYMENT.md`](./DEPLOYMENT.md).

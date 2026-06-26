@@ -43,7 +43,7 @@ services:
         value: SBI
 
       # --- CORS — set to your deployed Vercel URL (comma-separated for multiple) ---
-      # e.g. https://sbi-finpulse.vercel.app
+      # Live frontend: https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app
       - key: CORS_ORIGINS
         sync: false
 

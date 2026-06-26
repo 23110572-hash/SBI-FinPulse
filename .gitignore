@@ -24,6 +24,9 @@ backend/finpulse.db
 .vercel/
 .render/
 
+# Kiro local MCP settings (may contain API tokens — never commit)
+.kiro/settings/mcp.json
+
 # Logs, temporary files, and OS/editor metadata
 *.log
 *.tmp

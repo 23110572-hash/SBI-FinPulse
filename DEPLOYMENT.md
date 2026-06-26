@@ -1,5 +1,10 @@
 # 🚀 Deploying SBI FinPulse — Render (backend) + Vercel (frontend)
 
+> **Live deployment**
+> - Frontend (Vercel): https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app/
+> - Backend (Render): https://sbi-finpulse-api.onrender.com
+> - Health check: https://sbi-finpulse-api.onrender.com/api/health
+
 This guide covers a production-style split deploy:
 
 - **Backend (FastAPI)** → **Render** (web service, reads `render.yaml`)
@@ -48,12 +53,12 @@ Then set the **new** values as environment variables in Render (never commit the
    | `GROQ_API_KEY`, `GROQ_API_KEY_2`, `GROQ_API_KEY_3` | your Groq keys |
    | `HF_TOKEN` | your Hugging Face token |
    | `CHROMA_API_KEY`, `CHROMA_TENANT` | Chroma Cloud creds (`CHROMA_DATABASE` defaults to `SBI`) |
-   | `CORS_ORIGINS` | your Vercel URL, e.g. `https://sbi-finpulse.vercel.app` |
+   | `CORS_ORIGINS` | your Vercel URL, e.g. `https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app` |
    | `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | Gmail address + app password + display from |
    | `STAFF_API_TOKEN` | optional — set to lock the staff console |
 
 4. Deploy. Render runs `pip install -r requirements.txt` then `uvicorn main:app --host 0.0.0.0 --port $PORT`.
-5. Verify: open `https://<your-service>.onrender.com/api/health` — channels/data provider should report ready.
+5. Verify: open `https://sbi-finpulse-api.onrender.com/api/health` — channels/data provider should report ready.
 
 > **Free-tier note:** Render free web services spin down after ~15 min idle and cold-start on the next request (first call may take ~30s). The daily 22:00 scheduler only fires while the instance is awake — fine for a demo, upgrade to a paid instance or a Render Cron Job for guaranteed proactive sweeps.
 
