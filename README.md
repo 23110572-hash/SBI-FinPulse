@@ -13,7 +13,7 @@ Stack at a glance: 5 AI Agents, CrewAI, LangGraph, Groq Llama 3.3 70B, ChromaDB 
 
 | Surface | URL |
 |---|---|
-| Frontend | https://sbi-fin-pulse-dn42ayt9i-krishna-s-projects07.vercel.app/ |
+| Frontend | https://sbi-fin-pulse.vercel.app/ |
 | API docs | https://sbi-finpulse-api.onrender.com/docs |
 | Source (GitHub) | https://github.com/23110572-hash/SBI-FinPulse |
 
