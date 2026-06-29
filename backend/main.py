@@ -74,7 +74,7 @@ def health():
         "channels": {
             "whatsapp": settings.whatsapp_ready(),
             "sms": settings.has_twilio and bool(settings.twilio_sms_from),
-            "email": settings.has_smtp,
+            "email": settings.email_ready,
         },
         "scheduler_enabled": settings.enable_scheduler,
         "auto_send_approved": settings.auto_send_approved,

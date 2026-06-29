@@ -47,7 +47,14 @@ services:
       - key: CORS_ORIGINS
         sync: false
 
-      # --- Email (SMTP) outbound channel ---
+      # --- Email (Resend HTTP API) — primary outbound channel in production.
+      # Render blocks outbound SMTP, so email is sent over Resend's HTTPS API. ---
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM            # verified sender, e.g. "FinPulse <noreply@yourdomain.com>"
+        sync: false
+
+      # --- Email (SMTP) — local-dev fallback only (blocked on Render) ---
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT

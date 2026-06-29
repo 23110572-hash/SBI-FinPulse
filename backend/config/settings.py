@@ -85,12 +85,24 @@ class Settings(BaseSettings):
     twilio_whatsapp_from: str = ""
     twilio_sms_from: str = ""
 
-    # Email (SMTP) — primary channel
+    # Email (SMTP) — local-dev channel.
+    # NOTE: most PaaS hosts (Render free tier, etc.) BLOCK outbound SMTP ports
+    # (25/465/587). On those hosts use the Resend HTTP API below instead.
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from: str = "FinPulse <noreply@finpulse.local>"
+
+    # Email (Resend HTTP API) — primary channel in production.
+    # Sends over HTTPS (port 443), which hosts that block SMTP still allow.
+    # Get a key at https://resend.com → API Keys. Verify a sender domain/address.
+    resend_api_key: str = ""
+    # Optional explicit "from" for Resend. Falls back to smtp_from when blank.
+    # Must be an address on a domain you've verified in Resend (e.g.
+    # "FinPulse <noreply@yourdomain.com>"). For quick tests Resend allows
+    # "onboarding@resend.dev".
+    resend_from: str = ""
 
     # Auto-deliver compliance-approved nudges. Default ON: at SBI scale a
     # human approval queue is impractical — the compliance agent is the gate.
@@ -192,6 +204,23 @@ class Settings(BaseSettings):
     def has_smtp(self) -> bool:
         return bool(self.smtp_host and self.smtp_user and self.smtp_password)
 
+    @property
+    def has_resend(self) -> bool:
+        return bool(self.resend_api_key)
+
+    @property
+    def email_from(self) -> str:
+        """The 'From' header to use for outbound email.
+
+        Prefers an explicit Resend sender, else the SMTP 'from'.
+        """
+        return self.resend_from or self.smtp_from
+
+    @property
+    def email_ready(self) -> bool:
+        """Email can be sent over at least one transport (Resend or SMTP)."""
+        return self.has_resend or self.has_smtp
+
     def whatsapp_ready(self) -> bool:
         return self.has_meta_whatsapp if self.whatsapp_provider == "meta" else self.has_twilio
 
@@ -202,7 +231,7 @@ class Settings(BaseSettings):
         if c in ("sms",):
             return self.has_twilio and bool(self.twilio_sms_from)
         if c in ("email", "app_notification", "app", "push"):
-            return self.has_smtp
+            return self.email_ready
         return False
 
 

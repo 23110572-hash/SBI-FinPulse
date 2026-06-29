@@ -201,12 +201,44 @@ def _build_nudge_email(customer_name: str, product: str,
     return subject, plain, html
 
 
-def _send_email(to: str, subject: str, body: str,
-                html: str | None = None) -> tuple[str, str | None, str | None]:
-    if not settings.has_smtp:
-        return "not_configured", None, "SMTP not configured"
-    if not to:
-        return "failed", None, "no email address on customer"
+def _send_email_resend(to: str, subject: str, body: str,
+                       html: str | None = None) -> tuple[str, str | None, str | None]:
+    """Send via the Resend HTTP API (port 443 — works where SMTP is blocked)."""
+    payload = {
+        "from": settings.email_from,
+        "to": [to],
+        "subject": subject,
+        "text": body,
+    }
+    if html:
+        payload["html"] = html
+    try:
+        r = httpx.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {settings.resend_api_key}",
+                     "Content-Type": "application/json"},
+            json=payload, timeout=30.0,
+        )
+        if r.status_code >= 400:
+            # surface Resend's error message (e.g. unverified domain, bad key)
+            detail = r.text
+            try:
+                detail = r.json().get("message") or detail
+            except Exception:
+                pass
+            return "failed", None, f"resend {r.status_code}: {detail}"
+        mid = None
+        try:
+            mid = r.json().get("id")
+        except Exception:
+            pass
+        return "sent", mid, None
+    except Exception as e:
+        return "failed", None, f"resend: {e}"
+
+
+def _send_email_smtp(to: str, subject: str, body: str,
+                     html: str | None = None) -> tuple[str, str | None, str | None]:
     try:
         if html:
             msg = MIMEMultipart("alternative")
@@ -234,6 +266,28 @@ def _send_email(to: str, subject: str, body: str,
         return "sent", None, None
     except Exception as e:
         return "failed", None, str(e)
+
+
+def _send_email(to: str, subject: str, body: str,
+                html: str | None = None) -> tuple[str, str | None, str | None]:
+    """Send an email over the best available transport.
+
+    Prefers the Resend HTTP API (works on hosts that block outbound SMTP,
+    e.g. Render free tier). Falls back to SMTP for local development.
+    """
+    if not settings.email_ready:
+        return "not_configured", None, "no email transport configured (set RESEND_API_KEY or SMTP_*)"
+    if not to:
+        return "failed", None, "no email address on customer"
+
+    if settings.has_resend:
+        status, mid, err = _send_email_resend(to, subject, body, html=html)
+        # If Resend isn't usable but SMTP is, fall back rather than fail hard.
+        if status == "sent" or not settings.has_smtp:
+            return status, mid, err
+        log.warning("Resend send failed (%s); falling back to SMTP", err)
+
+    return _send_email_smtp(to, subject, body, html=html)
 
 
 # --- public API ------------------------------------------------------------
